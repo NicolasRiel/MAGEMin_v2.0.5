@@ -95,7 +95,7 @@ out     = single_point_minimization(P, T, data, X=X, Xoxides=Xoxides, sys_in=sys
 Finalize_MAGEMin(data)
 
 using MAGEMin_C
-data        =   Initialize_MAGEMin("ig", verbose=-1);
+data        =   Initialize_MAGEMin("mp", verbose=-1);
 test        =   0         #KLB1
 data        =   use_predefined_bulk_rock(data, test);
 P           =   8.0

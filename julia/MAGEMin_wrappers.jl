@@ -1522,7 +1522,7 @@ end
 
 
 """
-    single_point_minimization(P, T, MAGEMin_db; light=false, light_ig=false, name_solvus=false, fixed_bulk=false, test=0, X=nothing, B=nothing, G=nothing, scp=0, dT=2.0, iguess=false, rm_list=nothing, W=nothing, gbase=nothing, Xoxides=Vector{String}, sys_in="mol", rg="tc", progressbar=true)
+    single_point_minimization(P, T, MAGEMin_db; light=false, light_ig=false, name_solvus=false, fixed_bulk=false, calibration=false, test=0, X=nothing, B=nothing, G=nothing, scp=0, dT=2.0, iguess=false, rm_list=nothing, W=nothing, gbase=nothing, Xoxides=Vector{String}, sys_in="mol", rg="tc", progressbar=true)
 
     Perform a MAGEMin Gibbs energy minimization at a single pressure-temperature point.
 
@@ -1543,6 +1543,10 @@ end
     name_solvus : Bool, optional
         Resolve solvus naming (default: false).
     fixed_bulk : Bool, optional
+
+    calibration : Bool, optional
+        When true, after the normal solve also locally minimizes every structurally-feasible-but-not-stable
+        solution phase and appends non-duplicate results to `out.mSS_vec`, tagged `info="calib"`. Default false.
         Use fixed bulk composition (default: false).
     test : Int64, optional
         Built-in test case number (default: 0).
@@ -1619,6 +1623,7 @@ function single_point_minimization(     P           ::  T1,
                                         light_ig    ::  Bool                            = false,
                                         name_solvus ::  Bool                            = false,
                                         fixed_bulk  ::  Bool                            = false,
+                                        calibration ::  Bool                            = false,
                                         test        ::  Int64                           = 0, # if using a build-in test case,
                                         X           ::  VecOrMat                        = nothing,
                                         B           ::  Union{Nothing, T1 }             = nothing,
@@ -1662,6 +1667,7 @@ function single_point_minimization(     P           ::  T1,
                                                 light_ig    =   light_ig,
                                                 name_solvus =   name_solvus,
                                                 fixed_bulk  =   fixed_bulk,
+                                                calibration =   calibration,
                                                 test        =   test,
                                                 X           =   X,
                                                 B           =   B,
@@ -1730,6 +1736,7 @@ function multi_point_minimization(P           ::  AbstractMatrix{Float64},
                                   light_ig    ::  Bool                            = false,
                                   name_solvus ::  Bool                            = false,
                                   fixed_bulk  ::  Bool                            = false,
+                                  calibration ::  Bool                            = false,
                                   test        ::  Int64                           = 0,
                                   X           ::  Union{Nothing, Vector{Float64}, Matrix{Float64}} = nothing,
                                   B           ::  Union{Nothing, Vector{Float64}} = nothing,
@@ -1772,7 +1779,7 @@ function multi_point_minimization(P           ::  AbstractMatrix{Float64},
 
     out_vec = multi_point_minimization(Pvec, Tvec, MAGEMin_db;
                                        light=light, light_ig=light_ig, name_solvus=name_solvus,
-                                       fixed_bulk=fixed_bulk, test=test, X=Xvec, B=B, mu_fix_val=mu_fix_val, G=G,
+                                       fixed_bulk=fixed_bulk, calibration=calibration, test=test, X=Xvec, B=B, mu_fix_val=mu_fix_val, G=G,
                                        scp=scp, dT=dT, iguess=iguess, rm_list=rm_list,
                                        pp_list=pp_list, ss_list=ss_list, W=W, gbase=gbase,
                                        Xoxides=Xoxides, sys_in=sys_in, rg=rg,
@@ -1787,7 +1794,7 @@ end
 
 
 """
-    multi_point_minimization(P, T, MAGEMin_db; light=false, name_solvus=false, fixed_bulk=false, test=0, X=nothing, B=nothing, G=nothing, scp=0, dT=2.0, iguess=false, rm_list=nothing, W=nothing, gbase=nothing, Xoxides=Vector{String}, sys_in="mol", rg="tc", progressbar=true, callback_fn=nothing, callback_int=1)
+    multi_point_minimization(P, T, MAGEMin_db; light=false, name_solvus=false, fixed_bulk=false, calibration=false, test=0, X=nothing, B=nothing, G=nothing, scp=0, dT=2.0, iguess=false, rm_list=nothing, W=nothing, gbase=nothing, Xoxides=Vector{String}, sys_in="mol", rg="tc", progressbar=true, callback_fn=nothing, callback_int=1)
 
     Perform (parallel) MAGEMin calculations for a range of points as a function of pressure, temperature and/or composition.
 
@@ -1806,6 +1813,10 @@ end
     name_solvus : Bool, optional
         If true, rename phases with solvus names (default: false).
     fixed_bulk : Bool, optional
+
+    calibration : Bool, optional
+        When true, after the normal solve also locally minimizes every structurally-feasible-but-not-stable
+        solution phase and appends non-duplicate results to `out.mSS_vec`, tagged `info="calib"`. Default false.
         If true, use fixed bulk composition (default: false).
     test : Int64, optional
         Build-in test case number (default: 0).
@@ -1881,6 +1892,7 @@ function multi_point_minimization(P           ::  T2,
                                   light_ig    ::  Bool                            = false,
                                   name_solvus ::  Bool                            = false,
                                   fixed_bulk  ::  Bool                            = false,
+                                  calibration ::  Bool                            = false,
                                   test        ::  Int64                           = 0, # if using a build-in test case,
                                   X           ::  VecOrMat                        = nothing,
                                   B           ::  Union{Nothing, Vector{T1}}  = nothing,
@@ -1978,7 +1990,7 @@ function multi_point_minimization(P           ::  T2,
         buffer      = isnothing(B) ? 0.0 :      B[i]
         mu_val_i    = isnothing(mu_fix_val) ? Float64[] : mu_fix_val[i]
         out         = point_wise_minimization(  P[i], T[i], gv, z_b, DB, splx_data;
-                                                light=light, light_ig=light_ig, buffer_n=buffer, mu_fix_val=mu_val_i, name_solvus=name_solvus, fixed_bulk=fixed_bulk, Gi=Gi, W=W, gbase=gbase, scp=scp, dT=dT, iguess=ig, rm_list=rm_list, seismic_cor=seismic_cor, aspect_ratio=aspect_ratio, seismic_water=seismic_water, shallow_correction=shallow_correction, fluid_as_melt=fluid_as_melt, anelastic_cor=anelastic_cor, filter_DEW_species=filter_DEW_species)
+                                                light=light, light_ig=light_ig, buffer_n=buffer, mu_fix_val=mu_val_i, name_solvus=name_solvus, fixed_bulk=fixed_bulk, calibration=calibration, Gi=Gi, W=W, gbase=gbase, scp=scp, dT=dT, iguess=ig, rm_list=rm_list, seismic_cor=seismic_cor, aspect_ratio=aspect_ratio, seismic_water=seismic_water, shallow_correction=shallow_correction, fluid_as_melt=fluid_as_melt, anelastic_cor=anelastic_cor, filter_DEW_species=filter_DEW_species)
 
         Out_PT[i]   = deepcopy(out)
 
@@ -2671,7 +2683,7 @@ end
 
 
 """
-    point_wise_minimization(P, T, gv, z_b, DB, splx_data; light=false, name_solvus=false, fixed_bulk=false, buffer_n=0.0, Gi=nothing, scp=0, dT=2.0, iguess=false, rm_list=nothing, W=nothing, gbase=nothing, seismic_cor=false, aspect_ratio=0.3)
+    point_wise_minimization(P, T, gv, z_b, DB, splx_data; light=false, name_solvus=false, fixed_bulk=false, calibration=false, buffer_n=0.0, Gi=nothing, scp=0, dT=2.0, iguess=false, rm_list=nothing, W=nothing, gbase=nothing, seismic_cor=false, aspect_ratio=0.3)
 
     Compute the stable mineral assemblage at given pressure and temperature for a specified bulk rock composition.
 
@@ -2696,6 +2708,10 @@ end
     name_solvus : Bool, optional
         Resolve solvus naming (default: false).
     fixed_bulk : Bool, optional
+
+    calibration : Bool, optional
+        When true, after the normal solve also locally minimizes every structurally-feasible-but-not-stable
+        solution phase and appends non-duplicate results to `out.mSS_vec`, tagged `info="calib"`. Default false.
         Use fixed bulk composition (default: false).
     buffer_n : Float64, optional
         Buffer value (default: 0.0).
@@ -2779,9 +2795,10 @@ function point_wise_minimization(   P       ::Float64,
                                     DB,
                                     splx_data;
                                     light       = false,
-                                    light_ig   = false,
+                                    light_ig    = false,
                                     name_solvus = false,
                                     fixed_bulk  = false,
+                                    calibration = false,
                                     buffer_n    = 0.0,
                                     mu_fix_val  ::Vector{Float64} = Float64[],
                                     Gi          = nothing,
@@ -2915,6 +2932,11 @@ function point_wise_minimization(   P       ::Float64,
     # gv      = LibMAGEMin.ComputeG0_point(gv.EM_database, z_b, gv, DB.PP_ref_db,DB.SS_ref_db);
 
     #= THIS IS WHERE pwm_init ends =#
+
+    # unconditional, unlike fixed_bulk (nested inside `if iguess==true && Gi!==nothing`
+    # below) -- calibration has no such dependency on a warm-start guess being provided
+    gv.calibration = calibration ? 1 : 0
+
     if ~isnothing(rm_list)
 
         SS_ref_db   = unsafe_wrap(Vector{LibMAGEMin.SS_ref},DB.SS_ref_db,gv.len_ss);
@@ -3203,18 +3225,19 @@ point_wise_minimization(P       ::  Number,
                         dT      ::  Float64     = 2.0,
                         iguess  ::  Bool        = false,
                         rm_list ::  Union{Nothing, Vector{Int64}}   = nothing,
-                        name_solvus::Bool       = false,
-                        fixed_bulk::Bool        = false,
+                        name_solvus ::Bool      = false,
+                        fixed_bulk  ::Bool      = false,
+                        calibration ::Bool      = false,
                         W       ::  Union{Nothing, Vector{MAGEMin_C.W_data{Float64, Int64}}} = nothing,
                         gbase   ::  Union{Nothing, Vector{MAGEMin_C.gbase_data{Float64, Int64}}} = nothing,
                         seismic_cor::Bool       = false,
                         aspect_ratio::Float64   = 0.3,
                         seismic_water::Int      = 0,
-                        shallow_correction::Bool = false,
-                        fluid_as_melt::Bool      = false,
+                        shallow_correction::Bool= false,
+                        fluid_as_melt::Bool     = false,
                         anelastic_cor::Bool     = false,
-                        filter_DEW_species::Bool = false) =
-                        point_wise_minimization(Float64(P),Float64(T), gv, z_b, DB, splx_data; buffer_n, mu_fix_val, Gi, scp, dT, iguess, rm_list, name_solvus, fixed_bulk, W, gbase, seismic_cor, aspect_ratio, seismic_water, shallow_correction, fluid_as_melt, anelastic_cor, filter_DEW_species)
+                        filter_DEW_species::Bool= false) =
+                        point_wise_minimization(Float64(P),Float64(T), gv, z_b, DB, splx_data; buffer_n, mu_fix_val, Gi, scp, dT, iguess, rm_list, name_solvus, fixed_bulk, calibration, W, gbase, seismic_cor, aspect_ratio, seismic_water, shallow_correction, fluid_as_melt, anelastic_cor, filter_DEW_species)
 
 point_wise_minimization(P       ::  Number,
                         T       ::  Number,
@@ -3232,6 +3255,7 @@ point_wise_minimization(P       ::  Number,
                         rm_list ::  Union{Nothing, Vector{Int64}}   = nothing,
                         name_solvus::Bool       = false,
                         fixed_bulk::Bool        = false,
+                        calibration::Bool       = false,
                         W       ::  Union{Nothing, Vector{MAGEMin_C.W_data{Float64, Int64}}} = nothing,
                         gbase   ::  Union{Nothing, Vector{MAGEMin_C.gbase_data{Float64, Int64}}} = nothing,
                         seismic_cor::Bool       = false,
@@ -3241,7 +3265,7 @@ point_wise_minimization(P       ::  Number,
                         fluid_as_melt::Bool      = false,
                         anelastic_cor::Bool     = false,
                         filter_DEW_species::Bool = false) =
-                        point_wise_minimization(Float64(P),Float64(T), gv, z_b, DB, splx_data; buffer_n, mu_fix_val, Gi, scp, dT, iguess, rm_list, name_solvus, fixed_bulk, W, gbase, seismic_cor, aspect_ratio, seismic_water, shallow_correction, fluid_as_melt, anelastic_cor, filter_DEW_species)
+                        point_wise_minimization(Float64(P),Float64(T), gv, z_b, DB, splx_data; buffer_n, mu_fix_val, Gi, scp, dT, iguess, rm_list, name_solvus, fixed_bulk, calibration, W, gbase, seismic_cor, aspect_ratio, seismic_water, shallow_correction, fluid_as_melt, anelastic_cor, filter_DEW_species)
 
 point_wise_minimization(P       ::  Number,
                         T       ::  Number,
@@ -3255,6 +3279,7 @@ point_wise_minimization(P       ::  Number,
                         rm_list ::  Union{Nothing, Vector{Int64}}   = nothing,
                         name_solvus::Bool       = false,
                         fixed_bulk::Bool        = false,
+                        calibration::Bool       = false,
                         W       ::  Union{Nothing, Vector{MAGEMin_C.W_data{Float64, Int64}}} = nothing,
                         gbase   ::  Union{Nothing, Vector{MAGEMin_C.gbase_data{Float64, Int64}}} = nothing,
                         seismic_cor::Bool       = false,
@@ -3264,7 +3289,7 @@ point_wise_minimization(P       ::  Number,
                         fluid_as_melt::Bool      = false,
                         anelastic_cor::Bool     = false,
                         filter_DEW_species::Bool = false) =
-                        point_wise_minimization(Float64(P),Float64(T), data.gv[1], data.z_b[1], data.DB[1], data.splx_data[1]; buffer_n, mu_fix_val, Gi, scp, dT, iguess, rm_list, name_solvus, fixed_bulk, W, gbase, seismic_cor, aspect_ratio, seismic_water, shallow_correction, fluid_as_melt, anelastic_cor, filter_DEW_species)
+                        point_wise_minimization(Float64(P),Float64(T), data.gv[1], data.z_b[1], data.DB[1], data.splx_data[1]; buffer_n, mu_fix_val, Gi, scp, dT, iguess, rm_list, name_solvus, fixed_bulk, calibration, W, gbase, seismic_cor, aspect_ratio, seismic_water, shallow_correction, fluid_as_melt, anelastic_cor, filter_DEW_species)
 
 
 """

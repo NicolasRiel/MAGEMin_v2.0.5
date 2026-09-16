@@ -892,11 +892,11 @@ global_variable ReadCommandLineOptions(	global_variable 	 gv,
 		else if (c == 306){ z_b->T				= strtold(opt.arg,NULL)+273.15;}
 		else if (c == 307){ z_b->P 				= strtold(opt.arg,NULL); 	}
 
-		else if (c == 312){ strcpy(gv.research_group,opt.arg); 				}
-		else if (c == 319){ strcpy(gv.buffer,opt.arg);						} 	
-		else if (c == 303){ strcpy(gv.File,opt.arg);		 				}
-		else if (c == 302){ strcpy(gv.db,opt.arg);		 					}
-		else if (c == 317){ strcpy(gv.sys_in,opt.arg);		 				}
+		else if (c == 312){ snprintf(gv.research_group, len_gv_research_group, "%s", opt.arg);	}
+		else if (c == 319){ snprintf(gv.buffer, len_gv_buffer, "%s", opt.arg);					} 	
+		else if (c == 303){ snprintf(gv.File, len_gv_file, "%s", opt.arg);		 				}
+		else if (c == 302){ snprintf(gv.db, len_gv_db, "%s", opt.arg);		 					}
+		else if (c == 317){ snprintf(gv.sys_in, len_gv_sys_in, "%s", opt.arg);		 			}
 
 		else if (c == 310){
 			char *p = strtok(opt.arg,",");

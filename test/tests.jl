@@ -436,11 +436,52 @@ finalize_MAGEMin(gv,DB,z_b,splx_data)
     n       =   100;
     P       =   fill(8.0,n)
     T       =   fill(800.0,n)
-    db      =   "ig" 
+    db      =   "ig"
     data    =   Initialize_MAGEMin(db, verbose=-1);
     out     =   multi_point_minimization(P, T, data, test=0);
     @test out[end].G_system ≈ -797.7873865220898
     @test sort(out[end].ph) == sort(["spl", "cpx",  "opx", "ol"])
+
+    Finalize_MAGEMin(data)
+end
+
+@testset verbose=true "calibration mode" begin
+    # gv.calibration (default off): after the normal solve, additionally locally
+    # minimizes every structurally-feasible-but-not-stable solution phase and appends
+    # non-duplicate results to out.mSS_vec, tagged info="calib". See
+    # calibration_output_struct in dump_function.c.
+    data = Initialize_MAGEMin("ig", verbose=-1);
+
+    # off by default: byte-identical to the existing "pointwise tests" reference values,
+    # and no "calib"-tagged entries at all -- the new code path must be fully inert
+    out_off = single_point_minimization(8.0, 800.0, data; test=0)
+    @test out_off.G_system ≈ -797.7873865220898
+    @test sort(out_off.ph) == sort(["spl", "cpx", "opx", "ol"])
+    @test !any(m -> m.info == "calib", out_off.mSS_vec)
+
+    # explicit calibration=false must match the implicit default above
+    out_false = single_point_minimization(8.0, 800.0, data; test=0, calibration=false)
+    @test out_false.G_system ≈ out_off.G_system
+    @test !any(m -> m.info == "calib", out_false.mSS_vec)
+
+    # on: same stable assemblage/energy (calibration must not perturb the real solve),
+    # plus new "calib" entries for phases that are structurally feasible but not stable
+    out_on = single_point_minimization(8.0, 800.0, data; test=0, calibration=true)
+    @test out_on.G_system ≈ out_off.G_system
+    @test sort(out_on.ph) == sort(out_off.ph)
+
+    calib_entries = filter(m -> m.info == "calib", out_on.mSS_vec)
+    @test length(calib_entries) > 0
+
+    # dedup rule: no "calib" entry duplicates an already-stable phase (a distinct local
+    # minimum of an already-stable MODEL is legitimate -- see plan doc -- but none of
+    # KLB-1's own stable phases should reappear verbatim here)
+    @test !any(m -> m.ph_name in out_on.ph, calib_entries)
+
+    # every reported driving force is finite and small in magnitude -- not on the order
+    # of gam_tot itself, which is what the double-subtraction bug (see plan doc) produced
+    # before it was fixed (899 for a phase whose real answer was 4.4)
+    @test all(m -> isfinite(m.deltaG) && abs(m.deltaG) < 30.0, calib_entries)
 
     Finalize_MAGEMin(data)
 end
