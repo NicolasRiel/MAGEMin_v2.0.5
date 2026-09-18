@@ -258,31 +258,31 @@ bulk_info retrieve_bulk_PT(				global_variable      gv,
 				printf("  - Database                  : Metabasite (Green et al., 2016)\n"	);
 			}
 			if (gv.EM_database 		== 11){
-				printf("  - Database                  : Metabasite extended (Green et al., 2016; oamp from Diener et al., 2007)\n"	);
+				printf("  - Database                  : Metabasite extended (Green et al., 2016 with oamp from Diener et al., 2007 and ta from Rebay et al., 2022)\n"	);
 			}
 			else if (gv.EM_database == 2){
-				printf("  - Database                  : Igneous (Holland et al., 2018 -> Green et al., 2024)\n"	);
+				printf("  - Database                  : Igneous (Green et al., 2025, corrected after Holland et al., 2018)\n"	);
 			}
 			else if (gv.EM_database == 22){
-				printf("  - Database                  : Igneous dry (Tomlinson & Holland, 2021 -> Su et al., 2026)\n"	);
+				printf("  - Database                  : Igneous dry (Su et al., 2026, corrected after Tomlinson & Holland, 2021)\n"	);
 			}
 			else if (gv.EM_database == 3){
 				printf("  - Database                  : Igneous alkaline dry (Weller et al., 2024)\n"	);
 			}
 			else if (gv.EM_database == 4 ){
-				printf("  - Database                  : Ultramafic (Evans & Frost, 2021)\n"	);
+				printf("  - Database                  : Ultramafic (Evans & Frost., 2021)\n"	);
 			}
 			else if (gv.EM_database == 5 ){
-				printf("  - Database                  : Ultramafic extended (Evans & Frost, 2021 + pl, amp and aug from Green et al., 2016)\n"	);
+				printf("  - Database                  : Ultramafic extended (Evans & Frost., 2021 with pl, amp and aug from Green et al., 2016)\n"	);
 			}
 			else if (gv.EM_database == 6 ){
-				printf("  - Database                  : Uppermost lower mantle to upper mantle database (Holland et al., 2013)\n"	);
+				printf("  - Database                  : Mantle (Holland et al., 2013)\n"	);
 			}
 			else if (gv.EM_database == 7 ){
-				printf("  - Database                  : Metapelite extended (White et al., 2014; po from Evans & Frost, 2021;  amp, dio and aug from Green et al., 2016)\n"	);
+				printf("  - Database                  : Metapelite extended (White et al., 2014 with po from Evans & Frost., 2021, amp dio and aug from Green et al., 2016)\n"	);
 			}
 			else if (gv.EM_database == 8 ){
-				printf("  - Database                  : All (union of mp/mb/mbe/ig/igd/igad/um/ume/mpe - White 2014, Green 2016, Holland 2018/2022/2024/2025, Tomlinson 2021, Evans & Frost 2021, Weller 2024, Baldwin 2005; mtl excluded; default ds636, some phases run off their originally-calibrated dataset)\n"	);
+				printf("  - Database                  : Global solution dataset - union of mp/mb/mbe/ig/igd/igad/um/ume/mpe - White 2014, Green 2016, Holland 2018/2022/2024/2025, Tomlinson 2021, Evans & Frost 2021, Weller 2024, Baldwin 2005; mtl excluded; default ds636, some phases run off their originally-calibrated dataset)\n"	);
 			}
 		}
 		else if (strcmp(gv.research_group, "sb") == 0) {
