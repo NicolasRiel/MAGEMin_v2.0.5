@@ -163,7 +163,7 @@ global_variable global_variable_alloc( bulk_info  *z_b ){
 	}
 
 	strcpy(gv.outpath,"./output/");					/** define the outpath to save logs and final results file	 						*/
-	strcpy(gv.version,"2.0.4 [30/09/2026]");		/** MAGEMin version 																*/
+	strcpy(gv.version,"2.0.4 [19/09/2026]");		/** MAGEMin version 																*/
 
 	/* generate parameters        		*/
 	strcpy(gv.buffer,"none");
@@ -465,18 +465,18 @@ SS_ref G_SS_init_EM_function(		SS_init_type		*SS_init,
 
     SS_ref_db.orderVar       = 0;
 	SS_ref_db.dew_warm_ok    = 0;
-	SS_ref_db.fName 		 = malloc(20 * sizeof(char)		);		
+	SS_ref_db.fName 		 = calloc(20, sizeof(char)		);		
 	SS_ref_db.EM_list 		 = malloc ((n_em) * sizeof (char*)	);
 	for (int i = 0; i < n_em; i++){ 
-		SS_ref_db.EM_list[i] = malloc(20 * sizeof(char)		);		
+		SS_ref_db.EM_list[i] = calloc(20, sizeof(char)		);		
 	}
 	SS_ref_db.CV_list 		 = malloc ((n_xeos) * sizeof (char*)	);
 	for (int i = 0; i < n_xeos; i++){ 
-		SS_ref_db.CV_list[i] = malloc(20 * sizeof(char)		);		
+		SS_ref_db.CV_list[i] = calloc(20, sizeof(char)		);		
 	}
 	SS_ref_db.SF_list 		 = malloc ((n_sf) * sizeof (char*)	);
 	for (int i = 0; i < n_sf; i++){ 
-		SS_ref_db.SF_list[i] = malloc(20 * sizeof(char)		);		
+		SS_ref_db.SF_list[i] = calloc(20, sizeof(char)		);		
 	}
 	if (sym == 0){
 		SS_ref_db.W   		= malloc (SS_ref_db.n_w * sizeof (double) ); 
