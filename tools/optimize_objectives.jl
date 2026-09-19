@@ -140,6 +140,9 @@ function classify_mu(func::AbstractString)
     return "loop not recognised"
 end
 
+mugex_done(func::AbstractString) = occursin("mu_Gex_sym_n2(", func) || occursin("mu_Gex_asym_n2(", func)
+cse_done(func::AbstractString) = any(l -> occursin(DECL, l), split(func, '\n'))
+
 function split_functions(src::AbstractString)
     starts = [m.offset for m in eachmatch(FUNC_HEAD, src)]
     isempty(starts) && return src, String[]
@@ -159,14 +162,25 @@ function optimize_objectives(src::AbstractString; cse::Bool = true, mugex::Bool 
         c = get!(stats, db, Dict{String,Int}())
         c["objectives"] = get(c, "objectives", 0) + 1
         g = String(f)
-        mugex && (g = mu_gex_pass(g))
-        if cse
-            g, why = cse_pass(g)
-            k = "cpow/csqrt " * why
-            c[k] = get(c, k, 0) + 1
+        if mugex
+            if mugex_done(g)
+                c["mu_Gex already O(n^2)"] = get(c, "mu_Gex already O(n^2)", 0) + 1
+            else
+                g = mu_gex_pass(g)
+                k = "mu_Gex " * classify_mu(g)
+                k == "mu_Gex O(n^2)" && (k = "mu_Gex O(n^2) new")
+                c[k] = get(c, k, 0) + 1
+            end
         end
-        k = "mu_Gex " * classify_mu(g)
-        c[k] = get(c, k, 0) + 1
+        if cse
+            if cse_done(g)
+                c["cpow/csqrt already hoisted"] = get(c, "cpow/csqrt already hoisted", 0) + 1
+            else
+                g, why = cse_pass(g)
+                k = "cpow/csqrt " * (why == "hoisted" ? "hoisted new" : why)
+                c[k] = get(c, k, 0) + 1
+            end
+        end
         push!(out, g)
     end
     res = head * join(out)
@@ -236,13 +250,16 @@ function main(args)
     src = read(file, String)
     res, stats = optimize_objectives(src; cse, mugex)
     if output !== nothing
-        if save && res != src
-            path = save_original(file, src, save_dir === nothing ? default_save_dir(file) : save_dir)
-            println(stderr, "saved unmodified copy: ", path)
-        elseif res == src
-            println(stderr, "no change, nothing saved")
+        if res == src
+            println(stderr, "already optimized: nothing to do, file not written, nothing saved")
+            abspath(output) == abspath(file) || write(output, res)
+        else
+            if save
+                path = save_original(file, src, save_dir === nothing ? default_save_dir(file) : save_dir)
+                println(stderr, "saved unmodified copy: ", path)
+            end
+            write(output, res)
         end
-        write(output, res)
     elseif !report
         print(stdout, res)
     end
