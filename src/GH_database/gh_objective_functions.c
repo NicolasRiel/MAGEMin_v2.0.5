@@ -2980,7 +2980,7 @@ static double GH_cpx_pure_ES_G_at_s(double s,double T,double Rgas,double Pv){
          - T*((S0)+(SX5)+(SS1)*s+(SX5X5)+(SX5S1)*s+(SS1S1)*s*s)
          + Pv*((V0)+(VX5)+(VS1)*s+(VX5X5)+(VS1S1)*s*s+(VX5S1)*s);
 }
-static double GH_cpx_pure_ES_G(double T,double Rgas,double Pv){
+static double GH_cpx_pure_ES_G_compute(double T,double Rgas,double Pv){
     double eps = 1.0e-8, lo = -1.0+eps, hi = 1.0-eps;
     double fa = GH_cpx_pure_ES_dgds(lo,T,Rgas,Pv), fb = GH_cpx_pure_ES_dgds(hi,T,Rgas,Pv);
     double a = lo, b = hi;
@@ -2994,6 +2994,15 @@ static double GH_cpx_pure_ES_G(double T,double Rgas,double Pv){
         }
     }
     return GH_cpx_pure_ES_G_at_s(0.5*(a+b),T,Rgas,Pv);
+}
+
+static double GH_cpx_pure_ES_G(double T,double Rgas,double Pv){
+    static __thread double c_T, c_R, c_P, c_G;
+    static __thread int    c_ok = 0;
+    if (c_ok && c_T == T && c_R == Rgas && c_P == Pv){ return c_G; }
+    c_G = GH_cpx_pure_ES_G_compute(T,Rgas,Pv);
+    c_T = T; c_R = Rgas; c_P = Pv; c_ok = 1;
+    return c_G;
 }
 
 double obj_gh_cpx(unsigned n, const double *x, double *grad, void *SS_ref_db){

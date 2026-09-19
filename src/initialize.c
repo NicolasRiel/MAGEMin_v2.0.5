@@ -618,23 +618,25 @@ SS_ref G_SS_init_EM_function(		SS_init_type		*SS_init,
 		Allocate memory for PGE pseudocompounds 
 	*/
 	SS_ref_db.n_Ppc   	= gv.n_Ppc;								/** maximum number of pseudocompounds to store */
-	SS_ref_db.G_Ppc   	= malloc ((SS_ref_db.n_Ppc) * sizeof (double) ); 
-	SS_ref_db.DF_Ppc 	= malloc ((SS_ref_db.n_Ppc) * sizeof (double) ); 
-	SS_ref_db.info_Ppc 	= malloc ((SS_ref_db.n_Ppc) * sizeof (int) 	 ); 
+	SS_ref_db.G_Ppc   	= calloc ((SS_ref_db.n_Ppc), sizeof (double) ); 
+	SS_ref_db.DF_Ppc 	= calloc ((SS_ref_db.n_Ppc), sizeof (double) ); 
+	SS_ref_db.info_Ppc 	= calloc ((SS_ref_db.n_Ppc), sizeof (int) 	 ); 
+	SS_ref_db.tot_Ppc 	= 0;
+	SS_ref_db.id_Ppc  	= 0;
 	SS_ref_db.p_Ppc 	= malloc ((SS_ref_db.n_Ppc) * sizeof (double*)); 
 	SS_ref_db.mu_Ppc 	= malloc ((SS_ref_db.n_Ppc) * sizeof (double*)); 
 	
 	for (int i = 0; i < (SS_ref_db.n_Ppc); i++){
-		SS_ref_db.p_Ppc[i] 	 = malloc ((n_em) * sizeof (double) 		);
-		SS_ref_db.mu_Ppc[i]  = malloc ((n_em) * sizeof (double) 		);
+		SS_ref_db.p_Ppc[i] 	 = calloc ((n_em), sizeof (double) 		);
+		SS_ref_db.mu_Ppc[i]  = calloc ((n_em), sizeof (double) 		);
 	}
 	SS_ref_db.comp_Ppc = malloc ((SS_ref_db.n_Ppc) * sizeof (double*) 	); 
 	for (int i = 0; i < (SS_ref_db.n_Ppc); i++){
-		SS_ref_db.comp_Ppc[i] = malloc (gv.len_ox * sizeof (double) 	);
+		SS_ref_db.comp_Ppc[i] = calloc (gv.len_ox, sizeof (double) 	);
 	}
 	SS_ref_db.xeos_Ppc = malloc ((SS_ref_db.n_Ppc) * sizeof (double*) 	); 
 	for (int i = 0; i < (SS_ref_db.n_Ppc); i++){
-		SS_ref_db.xeos_Ppc[i] = malloc ((n_xeos)  * sizeof (double) 	);
+		SS_ref_db.xeos_Ppc[i] = calloc ((n_xeos), sizeof (double) 	);
 	}	
 
 	/* initiliazes eye matrix as there is no need to redo it afterward */
@@ -1142,9 +1144,10 @@ void reset_SS(						global_variable 	 gv,
 		}
 
 		/* reset LP part of PGE (algo 2.0) */
+		int n_Ppc_used = SS_ref_db[iss].tot_Ppc;
 		SS_ref_db[iss].tot_Ppc 	= 0;
 		SS_ref_db[iss].id_Ppc  	= 0;
-		for (int i = 0; i < (SS_ref_db[iss].n_Ppc); i++){
+		for (int i = 0; i < n_Ppc_used; i++){
 			SS_ref_db[iss].info_Ppc[i]   = 0;
 			SS_ref_db[iss].G_Ppc[i]      = 0.0;
 			SS_ref_db[iss].DF_Ppc[i]     = 0.0;
