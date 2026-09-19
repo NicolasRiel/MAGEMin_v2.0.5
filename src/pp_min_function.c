@@ -897,6 +897,9 @@ global_variable init_em_db_sb(	int 				EM_database,
 				else if (gv.buffer_n >= 1.0){
 					buffer_n = 1.0-1e-8;
 				}
+				else{
+					buffer_n = gv.buffer_n;
+				}
 				double G0 = MgO.gbase;
 				if (gv.EM_database == 1 || gv.EM_database == 2){
 					G0 /= 4.0; // divide by 4 for sb21
@@ -946,6 +949,9 @@ global_variable init_em_db_sb(	int 				EM_database,
 				else if (gv.buffer_n >= 1.0){
 					buffer_n = 1.0-1e-8;
 				}
+				else{
+					buffer_n = gv.buffer_n;
+				}
 				double G0 = FeO.gbase;
 				if (gv.EM_database == 1 || gv.EM_database == 2){
 					G0 /= 4.0; // divide by 4 for sb21
@@ -991,6 +997,9 @@ global_variable init_em_db_sb(	int 				EM_database,
 				}
 				else if (gv.buffer_n >= 1.0){
 					buffer_n = 1.0-1e-8;
+				}
+				else{
+					buffer_n = gv.buffer_n;
 				}
 
 				PP_ref_db[i].gbase   =  z_b.R * z_b.T*log(buffer_n) + Al2O3.gbase;
