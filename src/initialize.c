@@ -163,7 +163,7 @@ global_variable global_variable_alloc( bulk_info  *z_b ){
 	}
 
 	strcpy(gv.outpath,"./output/");					/** define the outpath to save logs and final results file	 						*/
-	strcpy(gv.version,"2.0.4 [19/09/2026]");		/** MAGEMin version 																*/
+	strcpy(gv.version,"2.0.5 [28/09/2026]");		/** MAGEMin version 																*/
 
 	/* generate parameters        		*/
 	strcpy(gv.buffer,"none");
@@ -454,6 +454,8 @@ SS_ref G_SS_init_EM_function(		SS_init_type		*SS_init,
 	/* Retrieve the right data in the right place 	*/
 	SS_ref_db  = (*SS_init[ph_id])(			SS_ref_db,
 											gv							);
+	SS_ref_db.EM_database         = gv.EM_database;
+	SS_ref_db.gh_multistart_order = gv.gh_multistart_order;
 	/**
 		Allocate memory for solution phase models and pseudocompound storage (memory is initialized in the reset function)
 	*/
@@ -546,7 +548,7 @@ SS_ref G_SS_init_EM_function(		SS_init_type		*SS_init,
 	SS_ref_db.ape      		= malloc (n_em       	* sizeof (double) ); 
 	SS_ref_db.mat_phi 		= malloc (n_em       	* sizeof (double) ); 
 	SS_ref_db.mu_Gex  		= malloc (n_em       	* sizeof (double) ); 
-	SS_ref_db.sf      		= malloc (n_sf       	* sizeof (double) ); 
+	SS_ref_db.sf      		= calloc(n_sf, sizeof(double)); 
 	SS_ref_db.mu      		= malloc (n_em       	* sizeof (double) ); 
 	SS_ref_db.dfx    		= malloc (n_xeos     	* sizeof (double) ); 
 	SS_ref_db.ss_comp		= malloc (gv.len_ox  	* sizeof (double) ); 

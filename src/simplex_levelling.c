@@ -644,7 +644,22 @@ void generate_pseudocompounds(	int 		 		 ss,
 	}
 
 	for (int k = 0; k < gv.n_SS_PC[ss]; k++){
-		get_ss_pv = SS_pc_xeos[ss].ss_pc_xeos[k]; 
+		get_ss_pv = SS_pc_xeos[ss].ss_pc_xeos[k];
+
+		if (strcmp(gv.research_group, "br") == 0 || strcmp(gv.research_group, "gh") == 0){
+			double pc_sum = 0.0;
+			for (int i = 0; i < SS_ref_db[ss].n_xeos; i++){
+				if (SS_ref_db[ss].z_em[i] == 0.0){
+					get_ss_pv.xeos_pc[i] = 0.0;
+				}
+				pc_sum += get_ss_pv.xeos_pc[i];
+			}
+			if (pc_sum > 0.0){
+				for (int i = 0; i < SS_ref_db[ss].n_xeos; i++){
+					get_ss_pv.xeos_pc[i] /= pc_sum;
+				}
+			}
+		}
 
 		/* TMP, not so elegant way to deal with cases were an oxide of the bulk rock composition = 0.0 */	
 		for (int i = 0; i < SS_ref_db[ss].n_xeos; i++){
@@ -659,7 +674,7 @@ void generate_pseudocompounds(	int 		 		 ss,
 		G 	= (*SS_objective[ss])(SS_ref_db[ss].n_xeos, get_ss_pv.xeos_pc, 	NULL, &SS_ref_db[ss]);
 
 		SS_ref_db[ss].sf_ok = 1;
-		for (int i = 0; i < SS_ref_db[ss].n_sf; i++){
+		for (int i = 0; i < SS_ref_db[ss].n_sf && strcmp(gv.research_group, "sb") != 0; i++){
 			if (SS_ref_db[ss].sf[i] < 0.0 || isnan(SS_ref_db[ss].sf[i]) == 1|| isinf(SS_ref_db[ss].sf[i]) == 1){
 				SS_ref_db[ss].sf_ok = 0;
 				SS_ref_db[ss].sf_id = i;
@@ -1519,6 +1534,9 @@ void run_simplex_levelling(				bulk_info 	 		 z_b,
 	if (gv.verbose == 1){ printf(" Generate pseudocompounds:\n"); }
 	
 	PC_ref 			SS_pc_xeos[gv.len_ss];
+	for (iss = 0; iss < gv.len_ss; iss++){
+		SS_pc_xeos[iss].pc_own = NULL;
+	}
 
 	if (strcmp(gv.research_group, "tc") 	== 0 ){
 		if (gv.EM_database == 0){
@@ -1636,7 +1654,6 @@ void run_simplex_levelling(				bulk_info 	 		 z_b,
 			GH_pc_init_function(				SS_pc_xeos,
 												iss,
 												gv.SS_list[iss],
-												SS_ref_db[iss].z_em,
 												gv.EM_database				);
 		}
 	}
@@ -1644,8 +1661,7 @@ void run_simplex_levelling(				bulk_info 	 		 z_b,
 		for (iss = 0; iss < gv.len_ss; iss++){
 			BR_pc_init_function(				SS_pc_xeos,
 												iss,
-												gv.SS_list[iss],
-												SS_ref_db[iss].z_em				);
+												gv.SS_list[iss]				);
 		}
 	}
 
@@ -1668,7 +1684,11 @@ void run_simplex_levelling(				bulk_info 	 		 z_b,
 
 	}
 
-	t = clock() - t; 
+	for (iss = 0; iss < gv.len_ss; iss++){
+		free(SS_pc_xeos[iss].pc_own);
+	}
+
+	t = clock() - t;
 	time_taken  = ((double)t)/CLOCKS_PER_SEC; 
 	if (gv.verbose == 1){ printf("\n [time to generate PC time (ms) %.8f]\n",time_taken*1000);	}
 	t = clock();

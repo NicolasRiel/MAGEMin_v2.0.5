@@ -33,6 +33,7 @@ struct ss_pc{
 
 typedef struct PC_refs {
 	struct ss_pc *ss_pc_xeos;
+	struct ss_pc *pc_own;
 
 } PC_ref;
 
@@ -361,7 +362,7 @@ int runMAGEMin(								int argc,
 											char ** argv			);
 
 /* Function declaration from Initialize.h file */
-int find_EM_id(								char* em_tag			);
+int find_EM_id(								char* research_group, int EM_dataset, char* em_tag			);
 
 /* Function declaration from Initialize.h file */
 int find_DEW_id(								char* em_tag			);
@@ -563,6 +564,9 @@ typedef struct SS_refs {
 	double   phase_density;		/** density of the phase 								*/
 	double   volume;			/** volume of the phase 								*/
 	double   mass;				/** mass of the phase 									*/
+
+	int      EM_database;		/** gv.EM_database of the owning instance (gh: 0=xMELTS, 1=rMELTS, 2=pMELTS) */
+	int      gh_multistart_order;	/** gv.gh_multistart_order of the owning instance 		*/
 
 } SS_ref;
 

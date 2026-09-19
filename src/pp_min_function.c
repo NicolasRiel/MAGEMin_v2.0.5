@@ -1620,15 +1620,7 @@ global_variable init_em_db_gh(	int 				EM_database,
 								global_variable 	gv,
 								PP_ref 			   *PP_ref_db
 ){
-		/* runs before GH_SS_objective_init_function (MAGEMin.c's own call
-		   order), so GH_actual_EM_database must ALSO be set here - not
-		   just there - otherwise the very first gbase computation for gh
-		   (this function, and init_ss_db_gh's own equivalent) would still
-		   see the stale default. See GH_gem_function.c's header comment
-		   and [[gh-multicalibration-xmelts-rmelts-pmelts]]. */
 		double buffer_n;
-
-		GH_actual_EM_database = gv.EM_database;
 		char state[] = "equilibrium";
 		int sum_zel;
 		for (int i = 0; i < gv.len_pp; i++){
@@ -1927,7 +1919,7 @@ global_variable init_em_db_gh(	int 				EM_database,
 
 			if (gv.verbose==1){
 				printf("\n %4s:  %+10f %+10f\n",gv.PP_list[i],PP_ref_db[i].gbase, PP_ref_db[i].factor);
-				if (GH_actual_EM_database == 2){
+				if (gv.EM_database == 2){
 					printf(" S   A   C   M   F   K   N   T   O   Mn  Cr  H\n");
 				}
 				else {

@@ -1192,9 +1192,6 @@ global_variable init_ss_db_gh(	int 				 EM_database,
 								global_variable 	 gv,
 								SS_ref 				*SS_ref_db
 ){
-	/* see init_em_db_gh's own comment on why this is also set here, not
-	   just in GH_SS_objective_init_function. */
-	GH_actual_EM_database = gv.EM_database;
 	for (int i = 0; i < gv.len_ss; i++){
 		SS_ref_db[i].P  = z_b.P;
 		SS_ref_db[i].T  = z_b.T;

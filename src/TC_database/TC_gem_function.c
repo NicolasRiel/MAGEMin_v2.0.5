@@ -39,7 +39,7 @@ PP_ref TC_G_EM_function(	int 		 EM_dataset,
 ){
 	/* Get thermodynamic data */
 	EM_db EM_return;
-	int i, p_id = find_EM_id(name);
+	int i, p_id = find_EM_id("tc", EM_dataset, name);
 	EM_return   = Access_EM_DB(p_id, EM_dataset);
 	
 	/* Get composition (in molar amount) */
